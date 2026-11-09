@@ -17,9 +17,9 @@ import javax.swing.Timer;
 
 public class OverlayAlarm extends JFrame{
 
-    public static void showAlarm(String message, short showTimeInSeconds){
+    public static void showAlarm(String message, short showTimeInSeconds, String alarmSoundPath){
         
-        new OverlayAlarm(message, showTimeInSeconds).showAlarm();
+        new OverlayAlarm(message, showTimeInSeconds, alarmSoundPath).showAlarm();
         
     }
     
@@ -64,7 +64,7 @@ public class OverlayAlarm extends JFrame{
         
     }
     
-    private OverlayAlarm(String message, short showTimeInSeconds)
+    private OverlayAlarm(String message, short showTimeInSeconds, String alarmSoundPath)
     {
         InitializeComponents();
         _jlbMessage.setText(message);
@@ -72,7 +72,7 @@ public class OverlayAlarm extends JFrame{
         
         try{
             
-            _soundPlayer = new SoundPlayer(Configs.defaultAlarmSoundPath);
+            _soundPlayer = new SoundPlayer(alarmSoundPath);
             
         }
         catch (Exception any){

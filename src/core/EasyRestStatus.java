@@ -4,6 +4,7 @@ import core.events.EnRunningStateChangeReason;
 import core.events.IActionListener;
 import core.events.IRunningStateChangedListener;
 import core.events.ITickListener;
+import core.helpers.fileHelpers.FileHelper;
 import java.awt.event.ActionEvent;
 import java.time.Duration;
 import javax.swing.Timer;
@@ -25,23 +26,27 @@ public class EasyRestStatus {
     private Period _WorkPeriod = null;
     private Period _CurrentPeriod = null; 
 
-    public void setOnPeriodEnd(IActionListener _onPeriodEnd) {
+    public void setOnPeriodEndListener(IActionListener _onPeriodEnd) {
         this._onPeriodEnd = _onPeriodEnd;
     }
 
-    public void setOnPeriodSwitch(IActionListener _onPeriodSwitch) {
+    public void setOnPeriodSwitchListener(IActionListener _onPeriodSwitch) {
         this._onPeriodSwitch = _onPeriodSwitch;
     }
     
     public void setTickListener(ITickListener _tickListener) {
         this._tickListener = _tickListener;
     }
+
+    public void setOnRunningStateChangedListener(IRunningStateChangedListener _onRunningStateChanged) {
+        this._onRunningStateChanged = _onRunningStateChanged;
+    }
     
     public long getNumberOfSecondsRemainig() {
         return _NumberOfSecondsRemainig;
     }
 
-    public void setNumberOfSecondsRemainig(long NumberOfSecondsRemainig) {
+    private void setNumberOfSecondsRemainig(long NumberOfSecondsRemainig) {
         this._NumberOfSecondsRemainig = NumberOfSecondsRemainig;
     }
 
@@ -50,7 +55,10 @@ public class EasyRestStatus {
     }
 
     private void setRestPeriod(Period RestPeriod) {
+        
         this._RestPeriod = RestPeriod;
+        this._RestPeriod.setOnDurationChangedListener(this::periodDurationChanged);
+        
     }
 
     public Period getWorkPeriod() {
@@ -58,7 +66,10 @@ public class EasyRestStatus {
     }
 
     private void setWorkPeriod(Period WorkPeriod) {
+
         this._WorkPeriod = WorkPeriod;
+        this._WorkPeriod.setOnDurationChangedListener(this::periodDurationChanged);
+        
     }
 
     public Period getCurrentPeriod() {
@@ -75,13 +86,12 @@ public class EasyRestStatus {
 
     }
     
-    
     // methods & constructors
     
     public EasyRestStatus(boolean isRunning) {
         
-        _RestPeriod = new Period("فترة الراحة", "لقد حان وقت العمل", Duration.ofMinutes(10), Period.EnAlarmType.ScreenOverlay, null);
-        _WorkPeriod = new Period("فترة العمل", "لقد حان وقت الراحة", Duration.ofMinutes(20), Period.EnAlarmType.ScreenOverlay, null);
+        setRestPeriod(new Period("Rest Period", "It is time for work", Duration.ofMinutes(10), Period.EnAlarmType.ScreenOverlay, null));
+        setWorkPeriod(new Period("Work Period", "It is time for rest", Duration.ofMinutes(20), Period.EnAlarmType.ScreenOverlay, null));
 
         setCurrentPeriod(_WorkPeriod);
 
@@ -99,7 +109,15 @@ public class EasyRestStatus {
         Start();
     }
     
-    public void SwitchPeriods() {
+    
+    private void periodDurationChanged(Object sender){
+        
+        if (getCurrentPeriod() == ((Period) sender))
+            setNumberOfSecondsRemainig(((Period) sender).getDuration().toSeconds());
+        
+    }
+    
+    private void SwitchPeriods() {
         
         if (getCurrentPeriod() == _RestPeriod) 
         {
@@ -204,6 +222,18 @@ public class EasyRestStatus {
             
             Start(EnRunningStateChangeReason.TickCall);
         }
+    }
+    
+    public void saveToFile(String fileName){
+        
+        FileHelper.writeRecordToFile(fileName, ConvertToStringRecord());
+        
+    }
+    
+    public static EasyRestStatus laodFromFile(String fileName){
+        
+        return ConvertStringRecordToStatusObject(FileHelper.readRecordFromFile(fileName));
+        
     }
     
 }

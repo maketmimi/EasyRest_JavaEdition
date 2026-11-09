@@ -1,8 +1,12 @@
 package core;
 
+import core.alarms.Notification;
+import core.alarms.OverlayAlarm;
+import core.alarms.SoundOnlyAlarm;
+import core.events.IActionListener;
 import core.helpers.StringHelpers;
 import java.time.Duration;
-import core.helpers.soundHelpers.SoundHelpers;
+import java.awt.TrayIcon;
 
 public class Period {
 
@@ -18,16 +22,23 @@ public class Period {
     
     private String _Title;
     private Duration _duration;
+    
+    private IActionListener _onDurationChanged = null;
+    
     private String _EndOfPeriodMessage;
     private EnAlarmType _AlarmType;
 
     // path to alarm sound, null or white space means Default sound
     private String _AlarmSoundPath;
 
+    public void setOnDurationChangedListener(IActionListener _onDurationChanged) {
+        this._onDurationChanged = _onDurationChanged;
+    }
+    
     public String getAlarmSoundPath() {
         
         if (StringHelpers.isNullOrBlank(_AlarmSoundPath))
-            return "";
+            return Configs.defaultAlarmSoundPath;
         else
             return _AlarmSoundPath;
         
@@ -51,6 +62,9 @@ public class Period {
 
     public void setDuration(Duration Duration) {
         this._duration = Duration;
+        
+        if (_onDurationChanged != null)
+            _onDurationChanged.actionPerformed(this);
     }
 
     public String getEndOfPeriodMessage() {
@@ -71,54 +85,53 @@ public class Period {
 
     // class methods and constructors
 
+    // null alarm sound path for default sound
     public Period(String title, String endOfPeriodMessage, Duration duration, EnAlarmType alarmType, String AlarmSoundPath) {
         
-        setTitle(title);
-        setDuration(duration);
-        setEndOfPeriodMessage(endOfPeriodMessage);
-        setAlarmType(alarmType);
-        setAlarmSoundPath(AlarmSoundPath);
+        this._Title = title;
+        this._EndOfPeriodMessage = endOfPeriodMessage;
+        this._duration = duration;
+        this._AlarmType = alarmType;
+        this._AlarmSoundPath = AlarmSoundPath;
 
     }
 
     private void ShowScreenOverlayAlarm() {
-//        FrmAlarmOverlay frmAlarm;
-//
-//        switch (ValidateAlarmSoundFile()) {
-//            case EnValidateSoundFileResult.Valid:
-//                frmAlarm = new FrmAlarmOverlay(_EndOfPeriodMessage, AlarmSoundPath, 20);
-//                break;
-//            default:
-//                frmAlarm = new FrmAlarmOverlay(_EndOfPeriodMessage, Resources.DefaultAlarmSound, 20);
-//                break;
-//        }
-//
-//        frmAlarm.ShowDialog();
+        
+        OverlayAlarm.showAlarm(getEndOfPeriodMessage(), (short) 10, getAlarmSoundPath());
+
     }
 
-    private void ShowNotificationAlarm() {
-//        NotificationAlarm.ShowAlarm(_EndOfPeriodMessage);
+    private void ShowNotificationAlarm() throws Exception
+    {
+        Notification.showNotificationMessage("Alarm", getEndOfPeriodMessage(), TrayIcon.MessageType.INFO, Configs.getAppIconImage(), (short) 10);
     }
 
-    private void PlaySoundOnlyAlarm() {
-//        if (ValidateAlarmSoundFile() == EnValidateSoundFileResult.Valid) {
-//            SoundOnlyAlarm.PlayAlarm(10, AlarmSoundPath);
-//        } else {
-//            SoundOnlyAlarm.PlayAlarm(10, Resources.DefaultAlarmSound);
-//        }
+    private void PlaySoundOnlyAlarm() throws Exception
+    {
+        SoundOnlyAlarm.PlayAlarm((short) 10, getAlarmSoundPath());
     }
 
     public void ShowEndAlarm() {
-        switch (_AlarmType) {
-            case EnAlarmType.NotificationsOnly:
-                ShowNotificationAlarm();
-                break;
-            case EnAlarmType.SoundOnly:
-                PlaySoundOnlyAlarm();
-                break;
-            default:
-                ShowScreenOverlayAlarm();
-                break;
+        
+        try{
+            
+            switch (getAlarmType()) {
+                case EnAlarmType.NotificationsOnly:
+                    ShowNotificationAlarm();
+                    break;
+                case EnAlarmType.SoundOnly:
+                    PlaySoundOnlyAlarm();
+                    break;
+                default:
+                    ShowScreenOverlayAlarm();
+                    break;
+            }
+        }
+        catch (Exception any){
+            
+            ShowScreenOverlayAlarm();
+            
         }
     }
 
@@ -152,18 +165,6 @@ public class Period {
         {
             return null;
         }
-    
-    }
-
-    public SoundHelpers.EnValidateSoundFileResult ValidateAlarmSoundFile(){
-        
-        return SoundHelpers.ValidateAlarmSoundFile(_AlarmSoundPath);
-    
-    }
-
-    public boolean IsDefaultSound() {
-        
-        return ValidateAlarmSoundFile() == SoundHelpers.EnValidateSoundFileResult.Default;
     
     }
 
