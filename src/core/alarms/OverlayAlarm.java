@@ -28,9 +28,10 @@ public class OverlayAlarm extends JFrame{
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
         
         // this jframe
+        this.setTitle("EasyRest - Alarm");
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setAlwaysOnTop(true);
-        this.setIconImage(Toolkit.getDefaultToolkit().createImage(Configs.appIconPath));
+        this.setIconImage(Configs.getAppIconImage());
         this.setUndecorated(true);
         this.setResizable(false);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
