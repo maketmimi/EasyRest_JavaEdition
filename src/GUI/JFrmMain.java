@@ -28,14 +28,14 @@ public class JFrmMain extends JFrame {
         // jMainTappedPane
         Font tapsFont = new Font("Comic Sans MS", Font.BOLD, 20);
         
-        jMainTappedPane.setOpaque(true);
-        jMainTappedPane.setBackground(Color.WHITE);
-        jMainTappedPane.setForeground(Color.BLACK);
-        jMainTappedPane.setFont(tapsFont);
-        jMainTappedPane.addTab("Home", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/home.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), jPnlMainScreen, "Main screen");
-        jMainTappedPane.addTab("Settings", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/settings.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), jScrlSettingsScreen, "App settings");
-        jMainTappedPane.addTab("About", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/about.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), null, "About screen");
-        this.getContentPane().add(jMainTappedPane, BorderLayout.CENTER);
+        _jMainTappedPane.setOpaque(true);
+        _jMainTappedPane.setBackground(Color.WHITE);
+        _jMainTappedPane.setForeground(Color.BLACK);
+        _jMainTappedPane.setFont(tapsFont);
+        _jMainTappedPane.addTab("Home", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/home.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), _jPnlMainScreen, "Main screen");
+        _jMainTappedPane.addTab("Settings", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/settings.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), _jScrlSettingsScreen, "App settings");
+        _jMainTappedPane.addTab("About", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/about.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), _jPnlAboutScreen, "About screen");
+        this.getContentPane().add(_jMainTappedPane, BorderLayout.CENTER);
         
     }
 
@@ -45,8 +45,9 @@ public class JFrmMain extends JFrame {
 
     }
     
-    private final JTabbedPane jMainTappedPane = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
-    private final JPnlMainScreen jPnlMainScreen = new JPnlMainScreen(this);
-    private final JScrlSettingsScreen jScrlSettingsScreen = new JScrlSettingsScreen(this);
+    private final JTabbedPane _jMainTappedPane = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
+    private final JPnlMainScreen _jPnlMainScreen = new JPnlMainScreen(this);
+    private final JScrlSettingsScreen _jScrlSettingsScreen = new JScrlSettingsScreen(this);
+    private final JPnlAboutScreen _jPnlAboutScreen = new JPnlAboutScreen();
     
 }

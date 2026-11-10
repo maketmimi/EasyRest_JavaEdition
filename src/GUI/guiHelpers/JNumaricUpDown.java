@@ -1,5 +1,6 @@
 package GUI.guiHelpers;
 
+import java.awt.Color;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
@@ -12,4 +13,17 @@ public class JNumaricUpDown extends JSpinner {
 
     }
 
+    @Override
+    public void setForeground(Color fg) {
+
+        ((JSpinner.DefaultEditor) this.getEditor()).getTextField().setForeground(fg);
+
+    }
+    
+    public void setHorizontalAlignment(int horizontalAlignment){
+        
+        ((JSpinner.DefaultEditor) this.getEditor()).getTextField().setHorizontalAlignment(horizontalAlignment);
+        
+    }
+    
 }

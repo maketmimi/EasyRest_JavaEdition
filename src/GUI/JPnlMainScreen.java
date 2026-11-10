@@ -1,6 +1,7 @@
 package GUI;
 
 import GUI.guiHelpers.ComponentFactory;
+import GUI.guiHelpers.GUIConfigs;
 import GUI.guiHelpers.GridBagConstraintsBuilder;
 import GUI.guiHelpers.PanelsHelper;
 import java.awt.Color;
@@ -17,8 +18,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicButtonUI;
 
 
@@ -113,13 +112,11 @@ public class JPnlMainScreen extends JPanel {
         
     }
 
-    private static Color lablesBlue = new Color(5, 0, 23);
-
     private final JFrmMain _appMainWindow;
     private final JPanel _jPnlProgramState = PanelsHelper.CreateTitledJPanel("App Status");
     private final JToggleButton _jTgbAppStateSwitch = new JToggleButton("Running", true);
     private final JPanel _jPnlCurrentPeriod = PanelsHelper.CreateTitledJPanel("Current Period");
-    private final JLabel _jLblCurrentPeriod = ComponentFactory.CreateSimpleJLable("", lablesBlue, JLabel.CENTER, new Font("Comic Sans MS", Font.BOLD, 40));
+    private final JLabel _jLblCurrentPeriod = ComponentFactory.CreateSimpleJLable("", GUIConfigs.lablesBlue, JLabel.CENTER, new Font("Comic Sans MS", Font.BOLD, 40));
     private final JLabel _jLblCountDown = ComponentFactory.CreateSimpleJLable("", new Color(84, 0, 0), JLabel.CENTER, new Font("Comic Sans MS", Font.BOLD, 40));
     private final JButton _jBtnHideApp = new JButton();
     

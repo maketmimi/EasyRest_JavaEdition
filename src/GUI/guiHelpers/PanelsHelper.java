@@ -17,7 +17,7 @@ public final class PanelsHelper {
         createdPanel.setLayout(new GridBagLayout());
         createdPanel.setOpaque(false);
         LineBorder createdPanelLineBorder = new LineBorder(Color.BLACK, 1);
-        TitledBorder createdPanelBorder = new TitledBorder(createdPanelLineBorder, title, TitledBorder.LEFT, TitledBorder.TOP, new Font("Comic Sans MS", Font.BOLD, 30), new Color(5, 0, 23));
+        TitledBorder createdPanelBorder = new TitledBorder(createdPanelLineBorder, title, TitledBorder.LEFT, TitledBorder.TOP, new Font("Comic Sans MS", Font.BOLD, 30), GUIConfigs.lablesBlue);
         createdPanel.setBorder(createdPanelBorder);
         
         return createdPanel;

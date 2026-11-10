@@ -7,11 +7,19 @@ import java.awt.Toolkit;
 public final class Configs {
 
     public final static String appIconPath = "assets/images/appicon.png";
+    public final static String malekAltamimiLogoPath = "assets/images/malekaltamimilogo.png";
     public final static String defaultAlarmSoundPath = "assets/sounds/DefaultAlarmSound.wav";
+    public final static String malekAltamimiPortfolioLink = "https://altamimi.ly";
     
     public static Image getAppIconImage(){
         
         return Toolkit.getDefaultToolkit().createImage(appIconPath);
+        
+    }
+    
+    public static Image getMalekAltamimiLogoImage(){
+        
+        return Toolkit.getDefaultToolkit().createImage(malekAltamimiLogoPath);
         
     }
     
