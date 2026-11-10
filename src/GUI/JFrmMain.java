@@ -33,7 +33,7 @@ public class JFrmMain extends JFrame {
         jMainTappedPane.setForeground(Color.BLACK);
         jMainTappedPane.setFont(tapsFont);
         jMainTappedPane.addTab("Home", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/home.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), jPnlMainScreen, "Main screen");
-        jMainTappedPane.addTab("Settings", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/settings.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), null, "App settings");
+        jMainTappedPane.addTab("Settings", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/settings.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), jScrlSettingsScreen, "App settings");
         jMainTappedPane.addTab("About", new ImageIcon(Toolkit.getDefaultToolkit().createImage("assets/images/menuimages/about.png").getScaledInstance(32, 32, Image.SCALE_SMOOTH)), null, "About screen");
         this.getContentPane().add(jMainTappedPane, BorderLayout.CENTER);
         
@@ -46,6 +46,7 @@ public class JFrmMain extends JFrame {
     }
     
     private final JTabbedPane jMainTappedPane = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
-    private final JPnlMainScreen jPnlMainScreen = new JPnlMainScreen();
+    private final JPnlMainScreen jPnlMainScreen = new JPnlMainScreen(this);
+    private final JScrlSettingsScreen jScrlSettingsScreen = new JScrlSettingsScreen(this);
     
 }
