@@ -5,11 +5,15 @@ import core.helpers.soundHelpers.SoundPlayer;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -28,7 +32,7 @@ public class OverlayAlarm extends JFrame{
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
         
         // this jframe
-        this.setTitle("EasyRest - Alarm");
+        this.setTitle("EasyRest - Overlay Alarm");
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setAlwaysOnTop(true);
         this.setIconImage(Configs.getAppIconImage());
@@ -65,10 +69,20 @@ public class OverlayAlarm extends JFrame{
         
     }
     
-    private OverlayAlarm(String message, short showTimeInSeconds, String alarmSoundPath)
-    {
+    private OverlayAlarm(String message){
+        
         InitializeComponents();
         _jlbMessage.setText(message);
+        
+    }
+    
+    // Parent constructor
+    private OverlayAlarm(String message, short showTimeInSeconds, String alarmSoundPath)
+    {
+        this(message);
+        
+        setScreenToShowOverlayOn(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
+        
         _alarmTimer = new Timer(showTimeInSeconds * 1000, this::alarmTimer_Tick);
         
         try{
@@ -84,9 +98,39 @@ public class OverlayAlarm extends JFrame{
         
     }
 
+    // child constructor
+    private OverlayAlarm(OverlayAlarm jFrmParent, GraphicsDevice screenToShowOverlayOn, String message){
+        
+        this(message);
+        setjFrmParent(jFrmParent);
+        setScreenToShowOverlayOn(screenToShowOverlayOn);
+        
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        
+        getjFrmParent().addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+
+                parentFrameClosed();
+
+            }
+            
+        });
+        
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+                childFrameClosing();
+
+            }
+        });
+        
+    }
+    
     private void btnCloseClicked(ActionEvent e){
         
-        closeAlarm();
+        getjFrmParent().closeAlarm();
         
     }
     
@@ -96,31 +140,106 @@ public class OverlayAlarm extends JFrame{
         
     }
     
+    private void showChildOverlaysIfAny(){
+        
+        if (isChildOverlayFrame()) return;
+        
+        GraphicsDevice[] allScreens = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+        GraphicsDevice primaryScreen = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        
+        if (allScreens == null) return;
+        
+        for (GraphicsDevice screen : allScreens)
+        {
+            if (screen == primaryScreen) continue;
+            
+            new OverlayAlarm(this, screen, getAlarmMessage()).showAlarm();
+        }
+
+    }
+    
     private void showAlarm(){
         
         setVisible(true);
         
+        if (!isChildOverlayFrame())
+            showChildOverlaysIfAny();
+        
         if (_soundPlayer != null)
             _soundPlayer.PlayLooping();
         
-        _alarmTimer.start();
+        if (_alarmTimer != null)
+            _alarmTimer.start();
         
     }
 
     private void closeAlarm(){
         
-        _alarmTimer.stop();
+        if (_alarmTimer != null)
+            _alarmTimer.stop();
         
         if (_soundPlayer != null)
             _soundPlayer.dispose();
         
         this.dispose();
+    }
+    
+    private void parentFrameClosed(){
+
+        if (!isChildOverlayFrame()) return; // just an additional check although this should not be called from a parent overlay frame
+
+        closeAlarm();
+        
+    }
+    
+    private void childFrameClosing(){
+        
+        if (!isChildOverlayFrame()) return; // just an additional check although this should not be called from a parent overlay frame
+        
+        getjFrmParent().closeAlarm();
         
     }
     
     private final JButton _jbtnClose = new JButton();
     private final JLabel _jlbMessage = new JLabel();
-    private final Timer _alarmTimer;
-    private SoundPlayer _soundPlayer;
+    private Timer _alarmTimer = null;
+    private SoundPlayer _soundPlayer = null;
+    
+    private GraphicsDevice _screenToShowOverlayOn = null;
+    private OverlayAlarm _jFrmParent = null;
+    
+    private GraphicsDevice getScreenToShowOverlayOn() {
+        return _screenToShowOverlayOn;
+    }
+
+    private void setScreenToShowOverlayOn(GraphicsDevice screenToShowOverlayOn) {
+        
+        if (screenToShowOverlayOn == null) return;
+        
+        this._screenToShowOverlayOn = screenToShowOverlayOn;
+        
+        this.setLocation(this._screenToShowOverlayOn.getDefaultConfiguration().getBounds().getLocation());
+
+    }
+
+    private OverlayAlarm getjFrmParent() {
+        return _jFrmParent == null ? this : _jFrmParent;
+    }
+
+    private void setjFrmParent(OverlayAlarm jFrmParent) {
+        this._jFrmParent = jFrmParent;
+    }
+    
+    private boolean isChildOverlayFrame(){
+        
+        return _jFrmParent != null;
+        
+    }
+    
+    private String getAlarmMessage(){
+        
+        return _jlbMessage.getText();
+        
+    }
     
 }

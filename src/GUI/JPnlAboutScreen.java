@@ -17,7 +17,6 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.net.URI;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -32,14 +31,14 @@ public class JPnlAboutScreen extends JPanel {
         JLabel jLblAppTitle = ComponentFactory.CreateSimpleJLable("<html><center>Easy Rest<br>Java Edition</center></html>", Color.BLACK, JLabel.CENTER, new Font("Comic Sans MS", Font.BOLD, 40));
         
         JLabel jLblAppIconDisplay = new JLabel();
-        jLblAppIconDisplay.setPreferredSize(new Dimension(150, 150));
+        jLblAppIconDisplay.setPreferredSize(new Dimension(128, 128));
         jLblAppIconDisplay.setHorizontalAlignment(JLabel.CENTER);
         jLblAppIconDisplay.setIcon(new ImageIcon(Configs.getAppIconImage().getScaledInstance(128, 128, Image.SCALE_SMOOTH)));
 
-        _jPnlHeader.setLayout(new GridLayout(1, 2));
+        _jPnlHeader.setLayout(new GridBagLayout());
         _jPnlHeader.setOpaque(false);
-        _jPnlHeader.add(jLblAppTitle);
-        _jPnlHeader.add(jLblAppIconDisplay);
+        _jPnlHeader.add(jLblAppTitle, GridBagConstraintsBuilder.CreateConstraint(0, 0, 1.0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 40)));
+        _jPnlHeader.add(jLblAppIconDisplay, GridBagConstraintsBuilder.CreateConstraint(1, 0, 1.0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 40, 0, 0)));
         
     }
     

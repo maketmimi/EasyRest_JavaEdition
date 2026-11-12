@@ -4,6 +4,7 @@ import GUI.guiHelpers.ComponentFactory;
 import GUI.guiHelpers.GUIConfigs;
 import GUI.guiHelpers.GridBagConstraintsBuilder;
 import GUI.guiHelpers.PanelsHelper;
+import core.events.SimpleEventArgs;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -23,12 +24,7 @@ import javax.swing.plaf.basic.BasicButtonUI;
 
 public class JPnlMainScreen extends JPanel {
 
-    private void InitializeComponents(){
-        
-        
-        // this jpanel
-        this.setLayout(new GridBagLayout());
-        this.setBackground(Color.WHITE);
+    private void initialize_jPnlProgramState(){
         
         // jTgbAppStateSwitch
         _jTgbAppStateSwitch.setPreferredSize(new Dimension(300, 80));
@@ -54,11 +50,15 @@ public class JPnlMainScreen extends JPanel {
                 }
             }
         });
+        _jTgbAppStateSwitch.addActionListener(this::appStateSwitchToggled);
         
         // jPnlProgramState
         _jPnlProgramState.add(_jTgbAppStateSwitch, GridBagConstraintsBuilder.CreateConstraint(0, 0));
-        this.add(_jPnlProgramState, GridBagConstraintsBuilder.CreateConstraint(0, 0, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 10, 10, 10)));
-
+        
+    }
+    
+    private void initialize_jPnlCurrentPeriod(){
+        
         // jLblCurrentPeriod
         // TODO: remove
         _jLblCurrentPeriod.setText("Rest Period");
@@ -70,6 +70,24 @@ public class JPnlMainScreen extends JPanel {
         // jPnlCurrentPeriod
         _jPnlCurrentPeriod.add(_jLblCurrentPeriod, GridBagConstraintsBuilder.CreateConstraint(0, 0, new Insets(0, 0, 0, 40)));
         _jPnlCurrentPeriod.add(_jLblCountDown, GridBagConstraintsBuilder.CreateConstraint(1, 0, new Insets(0, 40, 0, 0)));
+        
+    }
+    
+    private void initializeComponents(){
+        
+        // this jpanel
+        this.setLayout(new GridBagLayout());
+        this.setBackground(Color.WHITE);
+        _appMainWindow.getEasyRestStatus().addOnRunningStateChangedListener(this::appStateChanged);
+        _appMainWindow.getEasyRestStatus().addOnNumberOfSecondsRemainingChangedListener(this::numberOfSecondsRemainingChanged);
+        _appMainWindow.getEasyRestStatus().addOnCurrentPeriodChangedListener(this::currentPeriodChanged);
+        
+        // _jPnlProgramState
+        initialize_jPnlProgramState();
+        this.add(_jPnlProgramState, GridBagConstraintsBuilder.CreateConstraint(0, 0, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 10, 10, 10)));
+
+        // _jPnlCurrentPeriod
+        initialize_jPnlCurrentPeriod();
         this.add(_jPnlCurrentPeriod, GridBagConstraintsBuilder.CreateConstraint(0, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(10, 10, 10, 10)));
         
         // jBtnHideApp
@@ -87,17 +105,64 @@ public class JPnlMainScreen extends JPanel {
     
     public JPnlMainScreen(JFrmMain appMainWindow) {
     
-        InitializeComponents();
         _appMainWindow = appMainWindow;
+        initializeComponents();
         
-        // TODO
-        // initialize UI lables
+        updateMainScreenUI();
+        
+    }
+    
+    public void updateMainScreenUI(){
+        
+        update_jTgbAppStateSwitch();
+        update_jLblCurrentPeriod();
+        update_jLblCountDown();
+        
+    }
+    
+    private void update_jTgbAppStateSwitch(){
+        
+        _jTgbAppStateSwitch.setSelected(_appMainWindow.getEasyRestStatus().isRunning());
+        
+    }
+    
+    private void update_jLblCurrentPeriod(){
+        
+        _jLblCurrentPeriod.setText(_appMainWindow.getEasyRestStatus().getCurrentPeriod().getTitle());
+        
+    }
+    
+    private void update_jLblCountDown(){
+        
+        _jLblCountDown.setText(_appMainWindow.getEasyRestStatus().getReminingDurationString());
+        
+    }
+    
+    public void appStateChanged(SimpleEventArgs eventArgs){
+
+        update_jTgbAppStateSwitch();
+        
+    }
+    
+    public void currentPeriodChanged(SimpleEventArgs eventArgs){
+
+        update_jLblCurrentPeriod();
+        
+    }
+    
+    public void numberOfSecondsRemainingChanged(SimpleEventArgs eventArgs){
+
+        update_jLblCountDown();
         
     }
     
     private void appStateSwitchToggled(ActionEvent e){
+
+        if (_jTgbAppStateSwitch.isSelected())
+            _appMainWindow.getEasyRestStatus().start();
+        else
+            _appMainWindow.getEasyRestStatus().pause();
         
-        // TODO
     }
     
     private void hideApp(){
@@ -119,5 +184,11 @@ public class JPnlMainScreen extends JPanel {
     private final JLabel _jLblCurrentPeriod = ComponentFactory.CreateSimpleJLable("", GUIConfigs.lablesBlue, JLabel.CENTER, new Font("Comic Sans MS", Font.BOLD, 40));
     private final JLabel _jLblCountDown = ComponentFactory.CreateSimpleJLable("", new Color(84, 0, 0), JLabel.CENTER, new Font("Comic Sans MS", Font.BOLD, 40));
     private final JButton _jBtnHideApp = new JButton();
+
+    public JButton getjBtnHideApp() {
+        return _jBtnHideApp;
+    }
+    
+    
     
 }

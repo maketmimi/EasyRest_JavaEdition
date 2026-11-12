@@ -1,13 +1,17 @@
 package core;
 
 import core.events.EnRunningStateChangeReason;
-import core.events.IActionListener;
+import core.events.GeneralEvent;
 import core.events.IRunningStateChangedListener;
-import core.events.ITickListener;
 import core.helpers.fileHelpers.FileHelper;
-import java.awt.event.ActionEvent;
 import java.time.Duration;
-import javax.swing.Timer;
+import core.events.IGeneralListener;
+import core.events.RunningStateChangedEvent;
+import core.events.RunningStateChangedEventArgs;
+import core.events.SimpleEventArgs;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 public class EasyRestStatus {
 
@@ -15,39 +19,40 @@ public class EasyRestStatus {
 
     // fields
 
-    private Timer tickTimer = new Timer(1000, this::Tick);
-    private ITickListener _tickListener = null;
-    private IActionListener _onPeriodEnd = null;
-    private IActionListener _onPeriodSwitch = null;
-    private IRunningStateChangedListener _onRunningStateChanged = null;
+    private final Timer _tickTimer = new Timer();
+    private boolean _isRunning = false;
+
+    private final GeneralEvent _onNumberOfSecondsRemainingChanged = new GeneralEvent();
+    private final GeneralEvent _onCurrentPeriodChanged = new GeneralEvent();
+    private final RunningStateChangedEvent _onRunningStateChanged = new RunningStateChangedEvent();
     
     private long _NumberOfSecondsRemainig;
     private Period _RestPeriod = null;
     private Period _WorkPeriod = null;
     private Period _CurrentPeriod = null; 
 
-    public void setOnPeriodEndListener(IActionListener _onPeriodEnd) {
-        this._onPeriodEnd = _onPeriodEnd;
+    public void addOnNumberOfSecondsRemainingChangedListener(IGeneralListener listenerToAdd) {
+        _onNumberOfSecondsRemainingChanged.addListener(listenerToAdd);
     }
 
-    public void setOnPeriodSwitchListener(IActionListener _onPeriodSwitch) {
-        this._onPeriodSwitch = _onPeriodSwitch;
+    public void addOnCurrentPeriodChangedListener(IGeneralListener listenerToAdd) {
+        _onCurrentPeriodChanged.addListener(listenerToAdd);
     }
     
-    public void setTickListener(ITickListener _tickListener) {
-        this._tickListener = _tickListener;
-    }
-
-    public void setOnRunningStateChangedListener(IRunningStateChangedListener _onRunningStateChanged) {
-        this._onRunningStateChanged = _onRunningStateChanged;
+    public void addOnRunningStateChangedListener(IRunningStateChangedListener listenerToAdd) {
+        _onRunningStateChanged.addListener(listenerToAdd);
     }
     
     public long getNumberOfSecondsRemainig() {
         return _NumberOfSecondsRemainig;
     }
 
-    private void setNumberOfSecondsRemainig(long NumberOfSecondsRemainig) {
+    private void setNumberOfSecondsRemaining(long NumberOfSecondsRemainig) {
+        
         this._NumberOfSecondsRemainig = NumberOfSecondsRemainig;
+        
+        _onNumberOfSecondsRemainingChanged.fire(new SimpleEventArgs(this));
+        
     }
 
     public Period getRestPeriod() {
@@ -57,7 +62,7 @@ public class EasyRestStatus {
     private void setRestPeriod(Period RestPeriod) {
         
         this._RestPeriod = RestPeriod;
-        this._RestPeriod.setOnDurationChangedListener(this::periodDurationChanged);
+        this._RestPeriod.addOnDurationChangedListener(this::periodDurationChanged);
         
     }
 
@@ -68,7 +73,7 @@ public class EasyRestStatus {
     private void setWorkPeriod(Period WorkPeriod) {
 
         this._WorkPeriod = WorkPeriod;
-        this._WorkPeriod.setOnDurationChangedListener(this::periodDurationChanged);
+        this._WorkPeriod.addOnDurationChangedListener(this::periodDurationChanged);
         
     }
 
@@ -81,43 +86,65 @@ public class EasyRestStatus {
         if (CurrentPeriod != null && (CurrentPeriod == _RestPeriod || CurrentPeriod == _WorkPeriod)) 
         {
             _CurrentPeriod = CurrentPeriod;
-            setNumberOfSecondsRemainig(getCurrentPeriod().getDuration().toSeconds());
+            
+            _onCurrentPeriodChanged.fire(new SimpleEventArgs(this));
+            
+            setNumberOfSecondsRemaining(getCurrentPeriod().getDuration().toSeconds());
         }
 
     }
     
     // methods & constructors
     
+    private EasyRestStatus(){
+        
+        _tickTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+
+                tick();
+
+            }
+        }, 1000, 1000);
+        
+    }
+    
     public EasyRestStatus(boolean isRunning) {
         
-        setRestPeriod(new Period("Rest Period", "It is time for work", Duration.ofMinutes(10), Period.EnAlarmType.ScreenOverlay, null));
-        setWorkPeriod(new Period("Work Period", "It is time for rest", Duration.ofMinutes(20), Period.EnAlarmType.ScreenOverlay, null));
+        this();
+        
+        // TODO edit default durations for work & rest
+        setRestPeriod(new Period("Rest Period", "It is time for work", Duration.ofSeconds(20), Period.EnAlarmType.ScreenOverlay, null));
+        setWorkPeriod(new Period("Work Period", "It is time for rest", Duration.ofSeconds(20), Period.EnAlarmType.ScreenOverlay, null));
 
         setCurrentPeriod(_WorkPeriod);
 
         if (isRunning)
-            Start();
+            start();
     }
 
-    private EasyRestStatus(Period workPeriod, Period restPeriod) {
+    private EasyRestStatus(Period workPeriod, Period restPeriod, boolean isRunning) {
+        
+        this();
         
         setWorkPeriod(workPeriod);
         setRestPeriod(restPeriod);
         
         setCurrentPeriod(_WorkPeriod);
-        
-        Start();
+
+        if (isRunning)
+            start();
     }
     
     
-    private void periodDurationChanged(Object sender){
+    private void periodDurationChanged(SimpleEventArgs eventArgs){
         
-        if (getCurrentPeriod() == ((Period) sender))
-            setNumberOfSecondsRemainig(((Period) sender).getDuration().toSeconds());
+        if (getCurrentPeriod() == ((Period) eventArgs.getSource()))
+            setNumberOfSecondsRemaining(((Period) eventArgs.getSource()).getDuration().toSeconds());
         
     }
     
-    private void SwitchPeriods() {
+    private void switchPeriods() {
         
         if (getCurrentPeriod() == _RestPeriod) 
         {
@@ -130,43 +157,39 @@ public class EasyRestStatus {
         
     }
 
-    public void Pause() {
+    public void pause() {
 
-        Pause(EnRunningStateChangeReason.NormalCall);
+        pause(EnRunningStateChangeReason.NormalCall);
         
     }
 
-    public void Start() {
+    public void start() {
 
-        Start(EnRunningStateChangeReason.NormalCall);
+        start(EnRunningStateChangeReason.NormalCall);
 
     }
     
-    private void Start(EnRunningStateChangeReason reason){
-        
-        tickTimer.start();
-        
-        if (_onRunningStateChanged != null)
-            _onRunningStateChanged.runningStateChanged(this, reason);
+    private void start(EnRunningStateChangeReason reason){
+
+        _isRunning = true;
+        _onRunningStateChanged.fire(new RunningStateChangedEventArgs(this, reason));
         
     }
     
-    private void Pause(EnRunningStateChangeReason reason){
+    private void pause(EnRunningStateChangeReason reason){
         
-        tickTimer.stop();
-        
-        if (_onRunningStateChanged != null)
-            _onRunningStateChanged.runningStateChanged(this, reason);
-
+        _isRunning = false;
+        _onRunningStateChanged.fire(new RunningStateChangedEventArgs(this, reason));
+   
     }
     
     public boolean isRunning()
     {
-        return tickTimer.isRunning();
+        return _isRunning;
     }
     
     // this returns the String of the remining seconds in Minutes:Seconds format
-    public String GetReminingDurationString() 
+    public String getReminingDurationString() 
     {
         int minutes = (int) getNumberOfSecondsRemainig() / 60;
         int seconds = (int) getNumberOfSecondsRemainig() % 60;
@@ -174,24 +197,26 @@ public class EasyRestStatus {
         return String.format("%02d:%02d", minutes, seconds);
     }
 
-    public String ConvertToStringRecord() {
-        return String.join(_RecordSeperator, _WorkPeriod.ConvertToStringRecord(), _RestPeriod.ConvertToStringRecord());
+    public String convertToStringRecord() {
+        return String.join(_RecordSeperator, _WorkPeriod.convertToStringRecord(), _RestPeriod.convertToStringRecord());
     }
 
-    public static EasyRestStatus ConvertStringRecordToStatusObject(String Record) {
+    public static EasyRestStatus convertStringRecordToStatusObject(String Record, boolean isRunning) {
         
-        String[] arrRecord = Record.split(_RecordSeperator);
+        if (Record == null) return null;
 
         try 
         {
-            Period WorkPeriod = Period.ConvertStringRecordToPeriod(arrRecord[0]);
-            Period RestPeriod = Period.ConvertStringRecordToPeriod(arrRecord[1]);
+            String[] arrRecord = Record.split(Pattern.quote(_RecordSeperator));
+            
+            Period WorkPeriod = Period.convertStringRecordToPeriod(arrRecord[0]);
+            Period RestPeriod = Period.convertStringRecordToPeriod(arrRecord[1]);
 
             if (WorkPeriod == null || RestPeriod == null) {
                 return null;
             }
 
-            return new EasyRestStatus(WorkPeriod, RestPeriod);
+            return new EasyRestStatus(WorkPeriod, RestPeriod, isRunning);
         } 
         catch (Exception any)
         {
@@ -199,40 +224,44 @@ public class EasyRestStatus {
         }
     }
 
-    private void Tick(ActionEvent e){
+    private void tick(){
         
-        setNumberOfSecondsRemainig(_NumberOfSecondsRemainig - 1);
-
-        if (_tickListener != null)
-            _tickListener.Tick(this);
+        if (!_isRunning) return;
+        
+        setNumberOfSecondsRemaining(_NumberOfSecondsRemainig - 1);
         
         if (getNumberOfSecondsRemainig() == 0)
         {
-            Pause(EnRunningStateChangeReason.TickCall);
+            pause(EnRunningStateChangeReason.TickCall);
             
-            getCurrentPeriod().ShowEndAlarm();
+            getCurrentPeriod().showEndAlarm();
             
-            if (_onPeriodEnd != null)
-                _onPeriodEnd.actionPerformed(this);
+            switchPeriods();
             
-            SwitchPeriods();
-            
-            if (_onPeriodSwitch != null)
-                _onPeriodSwitch.actionPerformed(this);
-            
-            Start(EnRunningStateChangeReason.TickCall);
+            start(EnRunningStateChangeReason.TickCall);
         }
     }
     
-    public void saveToFile(String fileName){
+    public boolean saveToFile(String fileName){
         
-        FileHelper.writeRecordToFile(fileName, ConvertToStringRecord());
+        return FileHelper.writeRecordToFile(fileName, convertToStringRecord());
         
     }
     
-    public static EasyRestStatus laodFromFile(String fileName){
+    public static EasyRestStatus loadFromFile(String fileName, boolean isRunning){
         
-        return ConvertStringRecordToStatusObject(FileHelper.readRecordFromFile(fileName));
+        return convertStringRecordToStatusObject(FileHelper.readRecordFromFile(fileName), isRunning);
+        
+    }
+    
+    public static EasyRestStatus loadFromFileIfAnyOrDefault(String fileName, boolean isRunning){
+        
+        EasyRestStatus easyRestStatusToReturn = loadFromFile(fileName, isRunning);
+        
+        if (easyRestStatusToReturn != null)
+            return easyRestStatusToReturn;
+        else
+            return new EasyRestStatus(isRunning);
         
     }
     

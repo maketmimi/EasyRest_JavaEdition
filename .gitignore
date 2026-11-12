@@ -1,5 +1,6 @@
 build/
 dist/
 test/
+data/
 TODO.txt
 src/Testing.java

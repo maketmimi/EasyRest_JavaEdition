@@ -52,4 +52,30 @@ public class SoundPlayer {
         
     }
     
+    // not efficient
+    public static boolean isAudioFileSupported(String fileName){
+        
+        Clip testClip = null;
+        
+        try{
+            
+            testClip = AudioSystem.getClip();
+            
+            testClip.open(AudioSystem.getAudioInputStream(new File(fileName)));
+            
+            return true;
+        }
+        catch (Exception any)
+        {
+            return false;
+        }
+        finally{
+            
+            if (testClip != null)
+                testClip.close();
+            
+        }
+        
+    }
+    
 }

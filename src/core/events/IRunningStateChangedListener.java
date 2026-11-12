@@ -4,6 +4,6 @@ import core.EasyRestStatus;
 
 public interface IRunningStateChangedListener {
 
-    public void runningStateChanged(EasyRestStatus sender, EnRunningStateChangeReason reason);
+    public void runningStateChanged(RunningStateChangedEventArgs eventArgs);
     
 }

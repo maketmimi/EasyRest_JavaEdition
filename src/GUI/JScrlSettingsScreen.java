@@ -12,6 +12,10 @@ public class JScrlSettingsScreen extends JScrollPane {
         this.getVerticalScrollBar().setUnitIncrement(10);
         
     }
+
+    public void updateSettingsScreenUI() {
+        jPnlSettingsScreen.updateSettingsScreenUI();
+    }
     
     private final JPnlSettingsScreen jPnlSettingsScreen;
     

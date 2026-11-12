@@ -3,10 +3,13 @@ package core;
 import core.alarms.Notification;
 import core.alarms.OverlayAlarm;
 import core.alarms.SoundOnlyAlarm;
-import core.events.IActionListener;
+import core.events.GeneralEvent;
 import core.helpers.StringHelpers;
 import java.time.Duration;
 import java.awt.TrayIcon;
+import core.events.IGeneralListener;
+import core.events.SimpleEventArgs;
+import java.util.regex.Pattern;
 
 public class Period {
 
@@ -23,7 +26,7 @@ public class Period {
     private String _Title;
     private Duration _duration;
     
-    private IActionListener _onDurationChanged = null;
+    private GeneralEvent _onDurationChanged = new GeneralEvent();
     
     private String _EndOfPeriodMessage;
     private EnAlarmType _AlarmType;
@@ -31,8 +34,8 @@ public class Period {
     // path to alarm sound, null or white space means Default sound
     private String _AlarmSoundPath;
 
-    public void setOnDurationChangedListener(IActionListener _onDurationChanged) {
-        this._onDurationChanged = _onDurationChanged;
+    public void addOnDurationChangedListener(IGeneralListener listenerToAdd) {
+        _onDurationChanged.addListener(listenerToAdd);
     }
     
     public String getAlarmSoundPath() {
@@ -60,11 +63,11 @@ public class Period {
         return _duration;
     }
 
-    public void setDuration(Duration Duration) {
-        this._duration = Duration;
+    public void setDuration(Duration duration) {
         
-        if (_onDurationChanged != null)
-            _onDurationChanged.actionPerformed(this);
+        this._duration = duration.toSeconds() < 1 ? Duration.ofSeconds(1) : duration;
+        _onDurationChanged.fire(new SimpleEventArgs(this));
+        
     }
 
     public String getEndOfPeriodMessage() {
@@ -90,47 +93,47 @@ public class Period {
         
         this._Title = title;
         this._EndOfPeriodMessage = endOfPeriodMessage;
-        this._duration = duration;
+        this._duration = duration.toSeconds() < 1 ? Duration.ofSeconds(1) : duration;
         this._AlarmType = alarmType;
         this._AlarmSoundPath = AlarmSoundPath;
 
     }
 
-    private void ShowScreenOverlayAlarm() {
+    private void showScreenOverlayAlarm() {
         
         OverlayAlarm.showAlarm(getEndOfPeriodMessage(), (short) 10, getAlarmSoundPath());
 
     }
 
-    private void ShowNotificationAlarm() throws Exception
+    private void showNotificationAlarm() throws Exception
     {
-        Notification.showNotificationMessage("Alarm", getEndOfPeriodMessage(), TrayIcon.MessageType.INFO, Configs.getAppIconImage(), (short) 10);
+        Notification.showNotificationMessage("Alarm", getEndOfPeriodMessage(), TrayIcon.MessageType.INFO, Configs.getAppIconImage(), (short) 20);
     }
 
-    private void PlaySoundOnlyAlarm() throws Exception
+    private void playSoundOnlyAlarm() throws Exception
     {
         SoundOnlyAlarm.PlayAlarm((short) 10, getAlarmSoundPath());
     }
 
-    public void ShowEndAlarm() {
+    public void showEndAlarm() {
         
         try{
             
             switch (getAlarmType()) {
                 case EnAlarmType.NotificationsOnly:
-                    ShowNotificationAlarm();
+                    showNotificationAlarm();
                     break;
                 case EnAlarmType.SoundOnly:
-                    PlaySoundOnlyAlarm();
+                    playSoundOnlyAlarm();
                     break;
                 default:
-                    ShowScreenOverlayAlarm();
+                    showScreenOverlayAlarm();
                     break;
             }
         }
         catch (Exception any){
             
-            ShowScreenOverlayAlarm();
+            showScreenOverlayAlarm();
             
         }
     }
@@ -140,13 +143,13 @@ public class Period {
         return getTitle();
     }
 
-    public String ConvertToStringRecord() {
+    public String convertToStringRecord() {
         return String.join(_RecordSeperator, getTitle(), getEndOfPeriodMessage(), Long.toString(getDuration().toSeconds()), getAlarmType().toString(), getAlarmSoundPath());
     }
 
-    public static Period ConvertStringRecordToPeriod(String Record) {
+    public static Period convertStringRecordToPeriod(String Record) {
         
-        String[] arrRecord = Record.split(_RecordSeperator);
+        String[] arrRecord = Record.split(Pattern.quote(_RecordSeperator));
 
         try 
         {
