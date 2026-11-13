@@ -34,22 +34,7 @@ public class JPnlMainScreen extends JPanel {
         _jTgbAppStateSwitch.addActionListener(this::appStateSwitchToggled);
         _jTgbAppStateSwitch.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         _jTgbAppStateSwitch.setUI(new BasicButtonUI());
-        _jTgbAppStateSwitch.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-
-                if (_jTgbAppStateSwitch.isSelected())
-                {
-                    _jTgbAppStateSwitch.setBackground(Color.GREEN);
-                    _jTgbAppStateSwitch.setText("Running");
-                }
-                else
-                {
-                    _jTgbAppStateSwitch.setBackground(Color.RED);
-                    _jTgbAppStateSwitch.setText("Stopped");
-                }
-            }
-        });
+        _jTgbAppStateSwitch.addItemListener(this::jTgbAppStateSwitchItemStateChanged);
         _jTgbAppStateSwitch.addActionListener(this::appStateSwitchToggled);
         
         // jPnlProgramState
@@ -58,14 +43,6 @@ public class JPnlMainScreen extends JPanel {
     }
     
     private void initialize_jPnlCurrentPeriod(){
-        
-        // jLblCurrentPeriod
-        // TODO: remove
-        _jLblCurrentPeriod.setText("Rest Period");
-        
-        // jLblCountDown
-        // TODO: remove
-        _jLblCountDown.setText("20:00");
         
         // jPnlCurrentPeriod
         _jPnlCurrentPeriod.add(_jLblCurrentPeriod, GridBagConstraintsBuilder.CreateConstraint(0, 0, new Insets(0, 0, 0, 40)));
@@ -177,6 +154,21 @@ public class JPnlMainScreen extends JPanel {
         
     }
 
+    private void jTgbAppStateSwitchItemStateChanged(ItemEvent e){
+        
+        if (_jTgbAppStateSwitch.isSelected()) 
+        {
+            _jTgbAppStateSwitch.setBackground(Color.GREEN);
+            _jTgbAppStateSwitch.setText("Running");
+        } 
+        else 
+        {
+            _jTgbAppStateSwitch.setBackground(Color.RED);
+            _jTgbAppStateSwitch.setText("Stopped");
+        }
+        
+    }
+    
     private final JFrmMain _appMainWindow;
     private final JPanel _jPnlProgramState = PanelsHelper.CreateTitledJPanel("App Status");
     private final JToggleButton _jTgbAppStateSwitch = new JToggleButton("Running", true);

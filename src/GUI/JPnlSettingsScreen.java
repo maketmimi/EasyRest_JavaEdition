@@ -82,8 +82,6 @@ public class JPnlSettingsScreen extends JPanel {
         _jTxtfWorkPeriodCurrentAlarmSound.setEditable(false);
         _jTxtfWorkPeriodCurrentAlarmSound.setPreferredSize(new Dimension(200, 50));
         _jTxtfWorkPeriodCurrentAlarmSound.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-        // TODO remove
-        _jTxtfWorkPeriodCurrentAlarmSound.setText("Default Alarm Sound");
         
         // _jBtnWorkPeriodChooseSound
         _jBtnWorkPeriodChooseSound.setForeground(GUIConfigs.lablesBlue);
@@ -145,8 +143,6 @@ public class JPnlSettingsScreen extends JPanel {
         _jTxtfRestPeriodCurrentAlarmSound.setEditable(false);
         _jTxtfRestPeriodCurrentAlarmSound.setPreferredSize(new Dimension(200, 50));
         _jTxtfRestPeriodCurrentAlarmSound.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-        // TODO remove
-        _jTxtfRestPeriodCurrentAlarmSound.setText("Default Alarm Sound");
         
         // _jBtnRestPeriodChooseSound
         _jBtnRestPeriodChooseSound.setForeground(GUIConfigs.lablesBlue);

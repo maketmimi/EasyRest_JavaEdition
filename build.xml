@@ -70,4 +70,12 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <target name="-post-jar">
+        <!-- Copy assets folder -->
+        <copy todir="${dist.dir}/assets">
+            <fileset dir="assets"/>
+        </copy>
+    </target>
+    
 </project>

@@ -12,7 +12,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
@@ -34,7 +33,18 @@ public class JPnlAboutScreen extends JPanel {
         jLblAppIconDisplay.setPreferredSize(new Dimension(128, 128));
         jLblAppIconDisplay.setHorizontalAlignment(JLabel.CENTER);
         jLblAppIconDisplay.setIcon(new ImageIcon(Configs.getAppIconImage().getScaledInstance(128, 128, Image.SCALE_SMOOTH)));
+        jLblAppIconDisplay.setToolTipText("Click to visit app github page");
+        jLblAppIconDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        jLblAppIconDisplay.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
 
+                jLblAppIconDisplayClicked(e);
+
+            }
+        
+        });
+        
         _jPnlHeader.setLayout(new GridBagLayout());
         _jPnlHeader.setOpaque(false);
         _jPnlHeader.add(jLblAppTitle, GridBagConstraintsBuilder.CreateConstraint(0, 0, 1.0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 40)));
@@ -70,9 +80,22 @@ public class JPnlAboutScreen extends JPanel {
         jLblMalekALtamimiLogoDisplay.setPreferredSize(new Dimension(50, 50));
         jLblMalekALtamimiLogoDisplay.setHorizontalAlignment(JLabel.CENTER);
         jLblMalekALtamimiLogoDisplay.setIcon(new ImageIcon(Configs.getMalekAltamimiLogoImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
+        jLblMalekALtamimiLogoDisplay.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        jLblMalekALtamimiLogoDisplay.setToolTipText("Click to visit Altamimi.ly");
+        jLblMalekALtamimiLogoDisplay.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+                malekAltamimiPorfolioLinkClicked(e);
+
+            }
+        
+        });
+
         
         JLabel jLblMalekAltamimiPortfolioLink = ComponentFactory.CreateSimpleJLable("Altamimi.ly", Color.BLACK, JLabel.CENTER, new Font("Comic Sans MS", Font.PLAIN, 20));
         jLblMalekAltamimiPortfolioLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        jLblMalekAltamimiPortfolioLink.setToolTipText("Click to visit Altamimi.ly");
         jLblMalekAltamimiPortfolioLink.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -124,6 +147,23 @@ public class JPnlAboutScreen extends JPanel {
             try{
 
                 Desktop.getDesktop().browse(new URI(Configs.malekAltamimiPortfolioLink));
+
+            }
+            catch (Exception any)
+            {
+                // do nothing
+            }
+        }
+            
+    }
+    
+    private void jLblAppIconDisplayClicked(MouseEvent e){
+        
+        if (SwingUtilities.isLeftMouseButton(e))
+        {
+            try{
+
+                Desktop.getDesktop().browse(new URI(Configs.easyRestGithubPageLink));
 
             }
             catch (Exception any)

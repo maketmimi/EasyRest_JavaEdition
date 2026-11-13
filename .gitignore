@@ -2,5 +2,6 @@ build/
 dist/
 test/
 data/
+showcasing/local/
 TODO.txt
 src/Testing.java

@@ -113,9 +113,8 @@ public class EasyRestStatus {
         
         this();
         
-        // TODO edit default durations for work & rest
-        setRestPeriod(new Period("Rest Period", "It is time for work", Duration.ofSeconds(20), Period.EnAlarmType.ScreenOverlay, null));
-        setWorkPeriod(new Period("Work Period", "It is time for rest", Duration.ofSeconds(20), Period.EnAlarmType.ScreenOverlay, null));
+        setWorkPeriod(new Period("Work Period", "It is time for rest", Duration.ofMinutes(20), Period.EnAlarmType.ScreenOverlay, null));
+        setRestPeriod(new Period("Rest Period", "It is time for work", Duration.ofMinutes(10), Period.EnAlarmType.ScreenOverlay, null));
 
         setCurrentPeriod(_WorkPeriod);
 
@@ -191,8 +190,8 @@ public class EasyRestStatus {
     // this returns the String of the remining seconds in Minutes:Seconds format
     public String getReminingDurationString() 
     {
-        int minutes = (int) getNumberOfSecondsRemainig() / 60;
-        int seconds = (int) getNumberOfSecondsRemainig() % 60;
+        long minutes = getNumberOfSecondsRemainig() / 60;
+        long seconds = getNumberOfSecondsRemainig() % 60;
         
         return String.format("%02d:%02d", minutes, seconds);
     }

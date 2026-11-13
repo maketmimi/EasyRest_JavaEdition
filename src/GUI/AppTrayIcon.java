@@ -45,7 +45,6 @@ public class AppTrayIcon extends TrayIcon {
         _appTrayIconMenu.add(_MishowSettings);
         _appTrayIconMenu.addSeparator();
         _appTrayIconMenu.add(_MiExitApp);
-        // TODO Update when opened
         
     }
     
@@ -63,6 +62,7 @@ public class AppTrayIcon extends TrayIcon {
 
             }
         });
+        this.setToolTip("EasyRest - Java Edition");
         
         // _appTrayIconMenu
         initialize_appTrayIconMenu();
